@@ -1,5 +1,6 @@
 package io.ahnlab.familytown.service;
 
+import io.ahnlab.familytown.dto.NotePositionRequest;
 import io.ahnlab.familytown.dto.NoteRequest;
 import io.ahnlab.familytown.dto.NoteResponse;
 import io.ahnlab.familytown.entity.Note;
@@ -71,6 +72,36 @@ public class NoteService {
         Note saved = noteRepository.save(note);
 
         Profile profile = profileRepository.findById(authorId).orElse(null);
+
+        return new NoteResponse(
+                saved.getId(),
+                saved.getAuthorId(),
+                profile != null ? profile.getNickname() : null,
+                profile != null ? profile.getAvatar() : null,
+                saved.getContent(),
+                saved.getColor(),
+                saved.getPosX(),
+                saved.getPosY(),
+                saved.getRotation(),
+                saved.getCreatedAt()
+        );
+    }
+
+    @Transactional
+    public NoteResponse updatePosition(UUID noteId, UUID requesterId, NotePositionRequest req) {
+        Note note = noteRepository.findById(noteId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Note not found"));
+
+        if (!note.getAuthorId().equals(requesterId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not the note owner");
+        }
+
+        note.setPosX(req.posX());
+        note.setPosY(req.posY());
+        note.setUpdatedAt(OffsetDateTime.now());
+
+        Note saved = noteRepository.save(note);
+        Profile profile = profileRepository.findById(saved.getAuthorId()).orElse(null);
 
         return new NoteResponse(
                 saved.getId(),

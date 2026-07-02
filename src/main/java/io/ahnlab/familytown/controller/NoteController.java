@@ -1,5 +1,6 @@
 package io.ahnlab.familytown.controller;
 
+import io.ahnlab.familytown.dto.NotePositionRequest;
 import io.ahnlab.familytown.dto.NoteRequest;
 import io.ahnlab.familytown.dto.NoteResponse;
 import io.ahnlab.familytown.service.NoteService;
@@ -31,6 +32,15 @@ public class NoteController {
         UUID userId = resolveUserId(httpRequest);
         NoteResponse response = noteService.createNote(userId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PatchMapping("/{id}/position")
+    public ResponseEntity<NoteResponse> updatePosition(@PathVariable UUID id,
+                                                        @RequestBody NotePositionRequest request,
+                                                        HttpServletRequest httpRequest) {
+        UUID userId = resolveUserId(httpRequest);
+        NoteResponse response = noteService.updatePosition(id, userId, request);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
